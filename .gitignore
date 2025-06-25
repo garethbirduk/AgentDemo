@@ -1,0 +1,66 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.dbmdl
+*.log
+*.pdb
+*.pidb
+*.psess
+*.vsp
+*.vspx
+*.vspscc
+*.vssscc
+*.orig
+
+## VS Code
+.vscode/
+
+## Visual Studio
+.vs/
+*.csproj.user
+
+## Build Results
+build/
+out/
+publish/
+
+## Packages
+*.nupkg
+*.snupkg
+*.nuspec
+*.ps1
+
+## OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## User secrets
+secrets.json
+
+## JetBrains Rider
+.idea/
+
+## Test Results
+TestResults/
+*.coverage
+*.coveragexml
+
+## ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+## Local DBs
+*.mdf
+*.ldf
+*.ndf
+
+## Others
+*.DS_Store
+# AgentDemo
