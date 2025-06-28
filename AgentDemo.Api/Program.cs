@@ -1,37 +1,87 @@
+using AgentDemo.Application.Services;
+using AgentDemo.Core.Interfaces;
+using AgentDemo.Domain.Entities;
+using AgentDemo.Infrastructure.Repositories;
+using AgentDemo.Infrastructure.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
+builder.Services.AddSingleton<ISectionRepository, SectionRepository>();
+builder.Services.AddSingleton<IMessageRepository, MessageRepository>();
+builder.Services.AddSingleton<ISummaryService, SummaryService>();
+builder.Services.AddSingleton<IAgentInsightService, AgentInsightService>();
+builder.Services.AddSingleton<SectionService>();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var scopedServices = scope.ServiceProvider;
+    await SeedData(scopedServices);
+}
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
 
-var summaries = new[]
+static async Task SeedData(IServiceProvider services)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    var sectionRepo = services.GetRequiredService<ISectionRepository>();
+    var messageRepo = services.GetRequiredService<IMessageRepository>();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    var sectionId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+
+    if ((await sectionRepo.GetByIdAsync(sectionId)) == null)
+    {
+        await sectionRepo.AddAsync(new Section
+        {
+            Id = sectionId,
+            Title = "Test Section",
+            Path = "/doc/1"
+        });
+
+        var messages = new[]
+        {
+            new Message
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sectionId,
+                Author = "Alice",
+                Content = "This section needs a better summary.",
+                Timestamp = DateTime.UtcNow.AddMinutes(-5)
+            },
+            new Message
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sectionId,
+                Author = "Bob",
+                Content = "Agreed. Want me to take a stab at it?",
+                Timestamp = DateTime.UtcNow.AddMinutes(-4)
+            },
+            new Message
+            {
+                Id = Guid.NewGuid(),
+                SectionId = sectionId,
+                Author = "Alice",
+                Content = "Yes please. Focus on the compliance angle.",
+                Timestamp = DateTime.UtcNow.AddMinutes(-3)
+            }
+        };
+
+        foreach (var msg in messages)
+            await messageRepo.AddAsync(msg);
+    }
+}
 
 app.Run();
 

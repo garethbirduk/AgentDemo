@@ -27,7 +27,7 @@ public interface ISummaryService
     Task<Summary> GenerateSummaryAsync(Section section, IEnumerable<Message> newMessages, Summary? previousSummary);
 }
 
-public interface IActionItemService
+public interface IAgentInsightService
 {
-    Task<IEnumerable<ActionItem>> ExtractActionsAsync(Summary summary);
+    Task<IEnumerable<AgentInsight>> ExtractInsightsAsync(Summary summary);
 }
