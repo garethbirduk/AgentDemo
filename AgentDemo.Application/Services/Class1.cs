@@ -33,13 +33,34 @@ public class SectionService
         message.SectionId = sectionId;
         await _messageRepo.AddAsync(message);
 
-        var messages = await _messageRepo.GetBySectionIdAsync(sectionId);
         var previousContext = await _summaryContextRepository.GetBySectionIdAsync(sectionId);
 
-        var context = await _summaryService.GenerateSummaryContextAsync(section, messages, previousContext);
+        var allMessages = await _messageRepo.GetBySectionIdAsync(sectionId);
+        IEnumerable<Message> newMessages;
+
+        if (previousContext?.LastMessageId is Guid lastId)
+        {
+            var found = false;
+            newMessages = new List<Message>();
+
+            foreach (var msg in allMessages.OrderBy(m => m.Timestamp))
+            {
+                if (found)
+                    ((List<Message>)newMessages).Add(msg);
+
+                if (msg.Id == lastId)
+                    found = true;
+            }
+        }
+        else
+        {
+            newMessages = allMessages;
+        }
+
+        var context = await _summaryService.GenerateSummaryContextAsync(section, newMessages, previousContext);
         await _summaryContextRepository.SaveAsync(context);
 
-        section.Messages = messages.ToList();
+        section.Messages = allMessages.ToList();
         await _sectionRepo.UpdateAsync(section);
     }
 

@@ -76,14 +76,14 @@ public class SummaryService : ISummaryService
             .Select(m => m.Content.Trim())
             .ToList();
 
-        var lastMsgId = sortedMessages.LastOrDefault()?.Id;
+        var lastMsgId = sortedMessages.OrderBy(m => m.Timestamp).LastOrDefault()?.Id;
 
         var context = new SummaryContext
         {
             Id = previousContext?.Id ?? Guid.NewGuid(),
             SectionId = section.Id,
             LastMessageId = lastMsgId,
-            SummaryText = $"[AUTO-SUMMARY of {sortedMessages.Count} messages]\n{combinedText}",
+            SummaryText = $"[NOT QUITE WORKING - SHOULD BE FULL SUMMARY NOT JUST LAST MESSGE AUTO-SUMMARY of {sortedMessages.Count} messages]\n{combinedText}",
             KeyPoints = keyPoints,
             UnresolvedTasks = unresolvedTasks,
             LastUpdated = DateTime.UtcNow

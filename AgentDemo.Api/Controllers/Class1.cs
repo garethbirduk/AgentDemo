@@ -70,6 +70,8 @@ public class SectionController : ControllerBase
     [HttpPost("{sectionId}/messages")]
     public async Task<IActionResult> PostMessage(Guid sectionId, [FromBody] Message message)
     {
+        message.Id = Guid.NewGuid();
+        message.Timestamp = DateTime.UtcNow;
         await _sectionService.AddMessageAsync(sectionId, message);
         return Ok();
     }
