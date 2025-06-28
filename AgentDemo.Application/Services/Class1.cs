@@ -8,14 +8,17 @@ public class SectionService
     private readonly IAgentInsightService _insightService;
     private readonly IMessageRepository _messageRepo;
     private readonly ISectionRepository _sectionRepo;
+    private readonly ISummaryContextRepository _summaryContextRepository;
     private readonly ISummaryService _summaryService;
 
     public SectionService(
         ISectionRepository sectionRepo,
         IMessageRepository messageRepo,
         ISummaryService summaryService,
-        IAgentInsightService insightService)
+        IAgentInsightService insightService,
+        ISummaryContextRepository summaryContextRepository)
     {
+        _summaryContextRepository = summaryContextRepository;
         _sectionRepo = sectionRepo;
         _messageRepo = messageRepo;
         _summaryService = summaryService;
@@ -31,10 +34,11 @@ public class SectionService
         await _messageRepo.AddAsync(message);
 
         var messages = await _messageRepo.GetBySectionIdAsync(sectionId);
-        var summary = await _summaryService.GenerateSummaryAsync(section, messages, null);
-        var insights = await _insightService.ExtractInsightsAsync(summary);
+        var previousContext = await _summaryContextRepository.GetBySectionIdAsync(sectionId);
 
-        // store summary/insights if persistence is added later
+        var context = await _summaryService.GenerateSummaryContextAsync(section, messages, previousContext);
+        await _summaryContextRepository.SaveAsync(context);
+
         section.Messages = messages.ToList();
         await _sectionRepo.UpdateAsync(section);
     }
@@ -76,5 +80,10 @@ public class SectionService
 
         var messages = await _messageRepo.GetBySectionIdAsync(sectionId);
         return await _summaryService.GenerateSummaryAsync(section, messages, null);
+    }
+
+    public async Task<SummaryContext?> GetSummaryContextAsync(Guid sectionId)
+    {
+        return await _summaryContextRepository.GetBySectionIdAsync(sectionId);
     }
 }

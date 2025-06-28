@@ -56,4 +56,39 @@ public class SummaryService : ISummaryService
 
         return Task.FromResult(summary);
     }
+
+    public Task<SummaryContext> GenerateSummaryContextAsync(
+    Section section,
+    IEnumerable<Message> newMessages,
+    SummaryContext? previousContext)
+    {
+        var sortedMessages = newMessages.OrderBy(m => m.Timestamp).ToList();
+        var combinedText = string.Join("\n", sortedMessages.Select(m => m.Content));
+
+        var keyPoints = sortedMessages
+            .Where(m => m.Content.Length < 200) // simple heuristic
+            .Select(m => m.Content.Trim())
+            .Take(5)
+            .ToList();
+
+        var unresolvedTasks = sortedMessages
+            .Where(m => m.Content.Contains("do") || m.Content.Contains("complete") || m.Content.Contains("take"))
+            .Select(m => m.Content.Trim())
+            .ToList();
+
+        var lastMsgId = sortedMessages.LastOrDefault()?.Id;
+
+        var context = new SummaryContext
+        {
+            Id = previousContext?.Id ?? Guid.NewGuid(),
+            SectionId = section.Id,
+            LastMessageId = lastMsgId,
+            SummaryText = $"[AUTO-SUMMARY of {sortedMessages.Count} messages]\n{combinedText}",
+            KeyPoints = keyPoints,
+            UnresolvedTasks = unresolvedTasks,
+            LastUpdated = DateTime.UtcNow
+        };
+
+        return Task.FromResult(context);
+    }
 }

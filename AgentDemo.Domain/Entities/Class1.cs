@@ -1,5 +1,18 @@
 ﻿namespace AgentDemo.Domain.Entities;
 
+public enum InsightType
+{
+    Comment,
+    Task,
+    Question,
+    Decision,
+    Approval,
+    Objection,
+    Rating,
+    LinkReference,
+    UploadReference
+}
+
 public class AgentInsight
 {
     public string? Author { get; set; }
@@ -38,15 +51,13 @@ public class Summary
     public Guid SectionId { get; set; }
 }
 
-public enum InsightType
+public class SummaryContext
 {
-    Comment,
-    Task,
-    Question,
-    Decision,
-    Approval,
-    Objection,
-    Rating,
-    LinkReference,
-    UploadReference
+    public Guid Id { get; set; }
+    public List<string> KeyPoints { get; set; } = new();
+    public Guid? LastMessageId { get; set; }
+    public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+    public Guid SectionId { get; set; }
+    public string SummaryText { get; set; } = string.Empty;
+    public List<string> UnresolvedTasks { get; set; } = new();
 }

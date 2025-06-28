@@ -2,6 +2,11 @@
 
 namespace AgentDemo.Core.Interfaces;
 
+public interface IAgentInsightService
+{
+    Task<IEnumerable<AgentInsight>> ExtractInsightsAsync(Summary summary);
+}
+
 public interface IMessageRepository
 {
     Task AddAsync(Message message);
@@ -25,9 +30,17 @@ public interface ISectionRepository
 public interface ISummaryService
 {
     Task<Summary> GenerateSummaryAsync(Section section, IEnumerable<Message> newMessages, Summary? previousSummary);
+
+    Task<SummaryContext> GenerateSummaryContextAsync(
+        Section section,
+        IEnumerable<Message> newMessages,
+        SummaryContext? previousContext
+    );
 }
 
-public interface IAgentInsightService
+public interface ISummaryContextRepository
 {
-    Task<IEnumerable<AgentInsight>> ExtractInsightsAsync(Summary summary);
+    Task<SummaryContext?> GetBySectionIdAsync(Guid sectionId);
+
+    Task SaveAsync(SummaryContext context);
 }

@@ -13,6 +13,7 @@ builder.Services.AddSingleton<IMessageRepository, MessageRepository>();
 builder.Services.AddSingleton<ISummaryService, SummaryService>();
 builder.Services.AddSingleton<IAgentInsightService, AgentInsightService>();
 builder.Services.AddSingleton<SectionService>();
+builder.Services.AddSingleton<ISummaryContextRepository, SummaryContextRepository>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -80,6 +81,16 @@ static async Task SeedData(IServiceProvider services)
 
         foreach (var msg in messages)
             await messageRepo.AddAsync(msg);
+
+        var sectionService = services.GetRequiredService<SectionService>();
+        await sectionService.AddMessageAsync(sectionId, new Message
+        {
+            Id = Guid.NewGuid(),
+            SectionId = sectionId,
+            Author = "Seeder",
+            Content = "(initial trigger)",
+            Timestamp = DateTime.UtcNow
+        });
     }
 }
 

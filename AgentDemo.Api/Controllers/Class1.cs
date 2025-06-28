@@ -59,6 +59,14 @@ public class SectionController : ControllerBase
         return Ok(summary);
     }
 
+    [HttpGet("{sectionId}/summary-context")]
+    public async Task<IActionResult> GetSummaryContext(Guid sectionId)
+    {
+        var context = await _sectionService.GetSummaryContextAsync(sectionId);
+        if (context == null) return NotFound();
+        return Ok(context);
+    }
+
     [HttpPost("{sectionId}/messages")]
     public async Task<IActionResult> PostMessage(Guid sectionId, [FromBody] Message message)
     {

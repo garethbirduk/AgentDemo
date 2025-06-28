@@ -56,3 +56,20 @@ public class SectionRepository : ISectionRepository
         return Task.CompletedTask;
     }
 }
+
+public class SummaryContextRepository : ISummaryContextRepository
+{
+    private readonly Dictionary<Guid, SummaryContext> _store = new();
+
+    public Task<SummaryContext?> GetBySectionIdAsync(Guid sectionId)
+    {
+        _store.TryGetValue(sectionId, out var context);
+        return Task.FromResult(context);
+    }
+
+    public Task SaveAsync(SummaryContext context)
+    {
+        _store[context.SectionId] = context;
+        return Task.CompletedTask;
+    }
+}
